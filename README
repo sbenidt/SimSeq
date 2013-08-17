@@ -1,0 +1,7 @@
+2013-08-17: SimSeq Version 1.0
+	- Created sortdata, samp.col, and data.sim functions
+	- sortdata: sorts matrix of gene express. data given vector of replicates and treatment
+	- samp.col: samples replicates by columns separately and independently
+	- data.sim: Now has functionality to simulate under both standard and independent method for both paired and unpaired data
+			
+SB  
