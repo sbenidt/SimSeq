@@ -5,3 +5,9 @@
 	- data.sim: Now has functionality to simulate under both standard and independent method for both paired and unpaired data
 			
 SB  
+
+2013-08-19: SimSeq Version 1.1
+	-Added symmetric swap functionality to data.sim function
+	-Added checks on initial parameters submitted to data.sim function
+	-help files are no longer working
+SB
