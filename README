@@ -1,18 +1,20 @@
-### The package SimSeq is currently hosted here (Aug 30, 2013) but will eventually be submitted to CRAN
-### when updates start to become stable
+### The package SimSeq is currently hosted here (Aug 30, 2013) but will eventually
+### be submitted to CRAN when updates start to become stable
 
-### To install SimSeq it is highly recommended to install and use the devtools package
+### To install SimSeq it is highly recommended to install and use the 
+### devtools package
 
 install.packages("devtools")
 library(devtools)
 install_github("SimSeq","sbenidt")
 
-### Or you can download the latest tar.gz file from the bin folder and submit the following commands to
-### the R console, changing the path variable as appropriate for where it is stored on your local
-### PC. You may need to specify or change the"lib" path in the install.packages function  
+### Or you can download the latest tar.gz file from the bin folder and submit the 
+### following commands to the R console, changing the path variable as appropriate 
+### for where it is stored on your local PC. You may need to specify or change the
+### "lib" path in the install.packages function  
 
 path <- "/path/to/package/SimSeq_x.y.z.tar.gz"
 install.packages(pkgs = path, repos = NULL, type = "source")
 
-### The bin folder contains all previous releases of SimSeq with a ReadMe detailing updated
-### functionality in each new version 
+### The bin folder contains all previous releases of SimSeq with a ReadMe 
+### detailing updated functionality in each new version 
