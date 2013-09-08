@@ -1,5 +1,5 @@
-### The package SimSeq is currently hosted here (Aug 30, 2013) but will eventually
-### be submitted to CRAN when updates start to become stable
+### The package SimSeq is currently hosted here but will eventually
+### be submitted to CRAN with any development versions continuing to be hosted here
 
 ### To install SimSeq it is highly recommended to install and use the 
 ### devtools package
@@ -16,5 +16,4 @@ install_github("SimSeq","sbenidt")
 path <- "/path/to/package/SimSeq_x.y.z.tar.gz"
 install.packages(pkgs = path, repos = NULL, type = "source")
 
-### The bin folder contains all previous releases of SimSeq with a ReadMe 
-### detailing updated functionality in each new version 
+### The bin folder contains all previous releases of SimSeq

@@ -1,6 +1,5 @@
 \name{SimData}
 \alias{SimData}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{SimData}
 \description{
 Given a matrix of RNA-Seq data, data.sim simulates a new RNA-Seq dataset with a known list of differentially expressed (DE) and equivalently expressed (EE) genes by sampling two groups of k.ind replicates and performing appropriate swaps between the two treatment group for each differentially expressed gene. One with a combination of the two treatment groups swapped in to ensure a set list of DE genes.
@@ -9,7 +8,7 @@ Given a matrix of RNA-Seq data, data.sim simulates a new RNA-Seq dataset with a 
 SimData(counts, treatment, replic = NULL, sort.method, k.ind, n.genes = NULL, 
 	n.diff = NULL, n1.genes = NULL, n1.diff = NULL, offset = NULL, 
 	samp.independent = FALSE, genes.select = NULL, genes.diff = NULL, 
-	genes1.select = NULL, probs = NULL, EBP = NULL, exact = FALSE, power = 1)
+	genes1.select = NULL, probs = NULL, weights = NULL, exact = FALSE, power = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -58,8 +57,8 @@ A vector specifying genes to be equivalently expressed through sampling only thr
   \item{probs}{
 Optional vector specifying the p-value of differential expression for each gene to be used in the estimate of EBP for each gene. If null, data.sim will perform a either a signed rank test (paired case) or a rank sum test (unpaired) case for each gene in the counts matrix.
 }
-  \item{EBP}{
-Optional vector specifying the Empirical Bayes Probability (EBP) of differential expression for each gene in the counts matrix.
+  \item{weights}{
+Optional vector specifying weights to be used for sampling which genes are to be differentially expressed in the simulation. If null, weights will be calculated using the fdrtool function from the package 'fdrtool' to calculate one minus local fdr.
 }
   \item{exact}{
 Specifies whether an exact signed rank test (paired) or exact ranksum test (unpaired) should be used.
@@ -69,15 +68,7 @@ Transorms EBP for each gene by raising each EBP estimate to some power. Must be 
 
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
 List containing:
 \item{counts}{Matrix of simulated gene expression data with known list of DE and EE genes}
 \item{genes.subset}{all genes included in the simulated matrix}
@@ -86,32 +77,25 @@ List containing:
 \item{DE.genes}{Logical vector specicying which genes in the simulated matrix are Differentially Expressed}
 \item{DE.genes1}{DE genes simulated from group 1}
 \item{DE.genes2}{DE genes simulated from group 2}
+\item{samp.col}{If samp.indepent equals FALSE, gives columns sampled from the counts matrix}
 
 }
-\references{
-Pounds SB, Gao CL, and Zhang H (2012). Empirical Bayesian Selection of Hypothesis Testing Procedures for Analysis of Sequence Count Expression Data. Statistical Applications in Genetics and Molecular Biology. 11-5, 7.
-}
+
 \author{
 Samuel Benidt <sbenidt@iastate.edu>
 }
-\note{
-%%  ~~further notes~~
-}
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 data(kidney)
-kidney.counts <- kidney[[1]]
-replic <- kidney[[2]]
-treatment <- kidney[[3]]
+attach(kidney)
+
+library(edgeR)
 offset <- calcNormFactors(kidney.counts, method = "TMM")
 
+library(fdrtool)
 data.sim <- SimData(counts = kidney.counts, replic = replic, treatment = treatment, 
-			sort.method = "paired", k.ind = 5, n.genes = 100, n.diff = 50)
+                    sort.method = "paired", k.ind = 5, n.genes = 500, n.diff = 100,
+                    n1.genes = 250, n1.diff = 50, offset = offset)
 
 ##OR
 sort.list <- SortData(counts = kidney.counts, treatment = treatment, replic = replic,
@@ -122,12 +106,13 @@ treatment <- sort.list[[3]]
 offset <- sort.list[[4]]
 
 probs <- CalcPvalWilcox(kidney.counts, treatment, sort.method = "paired", 
+
                         sorted = TRUE, offset = offset, exact = FALSE)
-EBP <- pval.hist(probs)$h.ebp
+weights <- 1 - fdrtool(probs, statistic = "pvalue", plot = FALSE, verbose = FALSE)$lfdr 
 
 data.sim <- SimData(counts = kidney.counts, replic = replic, treatment = treatment, 
-                    sort.method = "paired", k.ind = 5, n.genes = 100, n.diff = 50,
-                    EBP = EBP, offset = offset)
+                    sort.method = "paired", k.ind = 5, n.genes = 500, n.diff = 100,
+                    n1.genes = 250, n1.diff = 50, weights = weights, offset = offset)
 
 
 

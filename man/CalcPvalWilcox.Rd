@@ -1,6 +1,5 @@
 \name{CalcPvalWilcox}
 \alias{CalcPvalWilcox}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Calculate P-values of Differential Expression
 }
@@ -10,7 +9,6 @@ A function called within SimData. Calculates the P-value of differential express
 \usage{
 CalcPvalWilcox(counts, treatment, replic = NULL, sort.method, sorted = FALSE, offset, exact = FALSE)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{counts}{
 A matrix of counts where each row specifies a gene and each column specifies a replicate; counts matrix must contain data from an experiment with two treatment groups of either paired or unpaired data.
@@ -34,21 +32,9 @@ A positive numeric vector with length equal to the number of columns of counts m
 Specifies whether an exact signed rank test (paired) or exact ranksum test (unpaired) should be used.
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{
 probs: A vector of p-values of differential expression for each gene.
 }
 \author{
 Samuel Benidt <sbenidt@iastate.edu>
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 }

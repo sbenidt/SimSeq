@@ -9,14 +9,12 @@ A list of RNA Seq data downloaded from The Cancer Genome Atlas. Provides a matri
 }
 \usage{data(kidney)}
 \format{
-  The format is:
-List of 3
- $ kidney.counts: num [1:100, 1:138] 0 6 6 140 2042 ...
- $ replic       : Factor w/ 69 levels "3358","3387",..: 1 1 2 2 3 3 4 4 5 5 ...
- $ treatment    : Factor w/ 2 levels "0","1": 1 2 1 2 1 2 1 2 1 2 ...
+List containing:
+\itemize{
+\item kidney.counts: Matrix of RNA Seq data for 100 sampled genes and 69 paired columns from individuals with Kidney Renal Clear Cell Carcinoma
+\item replic: vector detailing which column in kidney.counts matrix belongs to each individual
+\item treatment: vector detailing whether each column in kidney.counts matrix is a non-tumor or tumor sample
 }
-\details{
-%%  ~~ If necessary, more details than the __description__ above ~~
 }
 \source{
 https://tcga-data.nci.nih.gov/tcga/

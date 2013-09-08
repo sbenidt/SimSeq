@@ -1,6 +1,5 @@
 \name{SortData}
 \alias{SortData}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 SortData
 }
@@ -29,15 +28,7 @@ Character vector specifying one of "unpaired" or "paired", depending on the stru
 A positive numeric vector with length equal to the number of columns of counts matrix.
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
 List containing:
 \item{counts}{sorted and trimmed matrix of counts}
 \item{replic}{sorted and trimmed replic vector}
@@ -47,13 +38,4 @@ List containing:
 }
 \author{
 Samuel Benidt <sbenidt@iastate.edu>
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 }

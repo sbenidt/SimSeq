@@ -5,7 +5,7 @@ function(counts, treatment, replic = NULL, sort.method,
                      offset = NULL, samp.independent = FALSE,
                      genes.select = NULL, genes.diff = NULL, 
                      genes1.select = NULL, 
-                     probs = NULL, EBP = NULL, exact = FALSE, power = 1){
+                     probs = NULL, weights = NULL, exact = FALSE, power = 1){
   #given matrix of gene expression counts with two treatment groups, 
   #simulates matrix of gene expression data with known list of DE
   #and EE genes. See help file for more info.
@@ -105,13 +105,13 @@ function(counts, treatment, replic = NULL, sort.method,
            number of rows in the counts matrix with each entry between 0 and 1.") 
   }
   
-  if (!is.null(EBP)){
-    if (!is.numeric(EBP))
-      stop("Error: EBP must be a numeric vector of length equal to the 
-           number of rows of the counts matrix with each entry between 0 and 1.")
-    if (any(EBP > 1) || any(EBP < 0) || length(EBP) != n.row) 
-      stop("Error: EBP must be a numeric vector of length equal to the 
-           number of rows of the counts matrix with each entry between 0 and 1.") 
+  if (!is.null(weights)){
+    if (!is.numeric(weights))
+      stop("Error: weights must be a numeric vector of length equal to the 
+           number of rows of the counts matrix.")
+    if (length(weights) != n.row) 
+      stop("Error: weights must be a numeric vector of length equal to the 
+           number of rows of the counts matrix.")
   }
   
   if (!is.null(replic)){
@@ -209,10 +209,12 @@ function(counts, treatment, replic = NULL, sort.method,
   
   
   #sort necessary inputs
-  sort.list <- SortData(counts, treatment, replic, sort.method, offset)
+  sort.list <- SortData(counts = counts, treatment = treatment,
+                        replic = replic, sort.method = sort.method, offset = offset)
   counts <- sort.list[[1]]
   treatment <- sort.list[[3]]
   offset <- sort.list[[4]]
+  sorting <- sort.list[[5]]
   
   #reset n.row and n.col variables since SortData function may have trimmed
   #counts matrix
@@ -220,18 +222,20 @@ function(counts, treatment, replic = NULL, sort.method,
   n.col <- dim(counts)[2]
   
   #calculate p-value of differential depression for each gene
-  if (is.null(probs) && is.null(EBP) && is.null(genes.diff)){
-    probs <- CalcPvalWilcox(counts, treatment, sort.method, sorted = TRUE, offset)
+  if (is.null(probs) && is.null(weights) && is.null(genes.diff)){
+    probs <- CalcPvalWilcox(counts = counts, treatment = treatment,
+                            sort.method = sort.method, sorted = TRUE, offset = offset)
   }  
   
-  #calulate empirical bayes probability of differential expression for each gene
-  if (is.null(EBP)){
-    if (is.null(genes.select) | is.null(genes.diff)) EBP <- 1 - pval.hist(probs)$h.ebp
+  #calulate local fdr (empirical bayes probability of differential expression) for each gene
+  if (is.null(weights)){
+    if (is.null(genes.select) | is.null(genes.diff)) weights <- 
+      1 - fdrtool(probs, statistic = "pvalue", plot = FALSE, verbose = FALSE)$lfdr
   } 
   
   SampGenes <- function(genes.select, genes.diff, genes1.select, genes1.diff = NULL,
                          n.genes, n.diff, n1.genes, n1.diff, 
-                         EBP, power, exact){
+                         weights, power, exact){
     #sample genes to be used in simulation and sample which genes are
     #to be differentially expressed
     
@@ -239,10 +243,10 @@ function(counts, treatment, replic = NULL, sort.method,
     if (is.null(genes.diff)){
       if(is.null(genes.select)){
         genes.diff <- 
-          sample(genes, n.diff, prob = (EBP)^power, replace = FALSE)
+          sample(genes, n.diff, prob = (weights)^power, replace = FALSE)
       } else {
         genes.diff <- 
-          sample(genes.select, n.diff, prob = (EBP[genes.select])^power, replace = FALSE)
+          sample(genes.select, n.diff, prob = (weights[genes.select])^power, replace = FALSE)
       }
     } 
     if (is.null(genes1.diff)){
@@ -298,7 +302,7 @@ function(counts, treatment, replic = NULL, sort.method,
   #sample EE and DE genes
   samp.genes.list <- SampGenes(genes.select, genes.diff, genes1.select, genes1.diff, 
                                 n.genes, n.diff, n1.genes, n1.diff,
-                                EBP, power, exact)
+                                weights, power, exact)
   genes.subset <- samp.genes.list[[1]]
   genes.subset1 <- samp.genes.list[[2]]
   genes.subset2 <- samp.genes.list[[3]]
@@ -328,8 +332,13 @@ function(counts, treatment, replic = NULL, sort.method,
   
   #swap in appropriate data to create matrix with known DE and EE genes
   #multiply by appropriate offsets and round
+
+  
+  samp.col <- NULL
+  
   if (samp.independent == FALSE){
     samp <- SampCol(n.col, k.ind, sort.method, treatment)
+    samp.col <- sorting[samp]
     offset.col <- offset[samp]
     
     #perform swaps for group 1
@@ -356,6 +365,7 @@ function(counts, treatment, replic = NULL, sort.method,
   #multiply by appropriate offsets and round
   #under independent method, sample columns separately and independently
   #for each gene
+
   if (samp.independent == TRUE){
     samp <- t(replicate(n.genes, SampCol(n.col, k.ind, sort.method, treatment)))
     offset.col <- apply(samp, 2, function(x) offset[x])
@@ -408,5 +418,5 @@ function(counts, treatment, replic = NULL, sort.method,
   return(list(counts = data.table, genes.subset = genes.subset, 
               genes.subset1 = genes.subset1, genes.subset2 = genes.subset2, 
               DE.genes = genes.diff, DE.genes1 = genes.diff1, 
-              DE.genes2 = genes.diff2))
+              DE.genes2 = genes.diff2, samp.col = samp.col))
 }
