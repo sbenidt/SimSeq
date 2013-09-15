@@ -1,28 +1,37 @@
-require(SimSeq)
 data(kidney)
 attach(kidney)
-offset <- calcNormFactors(kidney.counts, method = "TMM")
 
+library(edgeR)
+nf <- calcNormFactors(kidney.counts, method = "TMM")
+
+library(fdrtool)
 data.sim <- SimData(counts = kidney.counts, replic = replic, treatment = treatment, 
                     sort.method = "paired", k.ind = 5, n.genes = 500, n.diff = 100,
-                    n1.genes = 250, n1.diff = 50, offset = offset)
+                    norm.factors = nf)
 
-##OR
+##Save run time in repeated simulations
 sort.list <- SortData(counts = kidney.counts, treatment = treatment, replic = replic,
-                      sort.method = "paired", offset = offset)
-kidney.counts <- sort.list[[1]]
-replic <- sort.list[[2]]
-treatment <- sort.list[[3]]
-offset <- sort.list[[4]]
+                      sort.method = "paired", norm.factors = nf)
+kidney.counts <- sort.list$counts
+replic <- sort.list$replic
+treatment <- sort.list$treatment
+nf <- sort.list$norm.factors
 
 probs <- CalcPvalWilcox(kidney.counts, treatment, sort.method = "paired", 
-                        sorted = TRUE, offset = offset, exact = FALSE)
+                        sorted = TRUE, norm.factors = nf, exact = FALSE)
 weights <- 1 - fdrtool(probs, statistic = "pvalue", plot = FALSE, verbose = FALSE)$lfdr 
 
 data.sim <- SimData(counts = kidney.counts, replic = replic, treatment = treatment, 
                     sort.method = "paired", k.ind = 5, n.genes = 500, n.diff = 100,
-                    n1.genes = 250, n1.diff = 50, weights = weights, offset = offset)
+                    weights = weights, norm.factors = nf)
 
+#specify exactly which genes to use in simulation
+genes.select <- sample(1:nrow(kidney.counts), 500)
+genes.diff <- sample(genes.select, 100)
+
+data.sim <- SimData(counts = kidney.counts, replic = replic, treatment = treatment, 
+                    sort.method = "paired", k.ind = 5, genes.select = genes.select,
+                    genes.diff = genes.diff, weights = weights, norm.factors = nf)
 
 
 

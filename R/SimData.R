@@ -1,10 +1,8 @@
 SimData <-
 function(counts, treatment, replic = NULL, sort.method, 
                      k.ind, n.genes = NULL, n.diff = NULL, 
-                     n1.genes = NULL, n1.diff = NULL,
-                     offset = NULL, samp.independent = FALSE,
-                     genes.select = NULL, genes.diff = NULL, 
-                     genes1.select = NULL, 
+                     norm.factors = NULL, samp.independent = FALSE,
+                     genes.select = NULL, genes.diff = NULL,
                      probs = NULL, weights = NULL, exact = FALSE, power = 1){
   #given matrix of gene expression counts with two treatment groups, 
   #simulates matrix of gene expression data with known list of DE
@@ -83,7 +81,7 @@ function(counts, treatment, replic = NULL, sort.method,
   if (!is.numeric(n.diff)) 
     stop("Error: Number of DE genes, n.diff, must be a positive integer 
           less than n.genes.")
-  else if (round(n.diff) != n.diff || n.diff > n.genes || n.diff <= 0) 
+  else if (round(n.diff) != n.diff || n.diff > n.genes || n.diff < 0) 
     stop("Error: Number of DE genes, n.diff, must be a positive integer 
           less than n.genes.")
   
@@ -134,86 +132,27 @@ function(counts, treatment, replic = NULL, sort.method,
   if (sort.method == "paired" && is.null(replic)) 
     stop("Error: Must specify replic vector when sort.method equals 'paired'.")
   
-  if(!is.null(offset)){
-    if (!is.numeric(offset)) 
-      stop("Error: offset must be a positive numeric vector with 
+  if(!is.null(norm.factors)){
+    if (!is.numeric(norm.factors)) 
+      stop("Error: norm.factors must be a positive numeric vector with 
            length equal to the number of columns in the counts matrix.")
-    if (is.numeric(offset)){
-      if (any(offset <= 0) || length(offset) != n.col) 
-        stop("Error: offset must be a positive numeric vector with 
+    if (is.numeric(norm.factors)){
+      if (any(norm.factors <= 0) || length(norm.factors) != n.col) 
+        stop("Error: norm.factors must be a positive numeric vector with 
              length equal to the number of columns in the counts matrix.")
       }
     }
   
-  if (is.null(offset)) offset <- calcNormFactors(counts, method = "TMM") 
-
-  if (!is.null(genes1.select)){
-    if (is.null(genes.select) || is.null(genes.diff))
-      stop("Error: genes.diff vector cannot be specified without 
-            first specifying genes.select and genes.diff vectors.")
+  if (is.null(norm.factors)) {
+    require(edgeR)
+    norm.factors <- calcNormFactors(counts, method = "TMM") 
   }
-
-  if (!is.null(genes1.select)){
-    if (!is.numeric(genes1.select) && !is.logical(genes1.select)) 
-      stop("Error: genes1.select must be a NULL, numeric or logical vector.")
-    if (is.numeric(genes1.select)){
-      if (any(!genes1.select %in% genes.select)) 
-        stop("Error: genes1.select must be a subset of genes.select.") 
-    }
-    if (is.logical(genes1.select)){
-      if (length(genes1.select) != length(genes.select)) 
-        stop("Error: If specifying genes1.select as a logical vector, the length of 
-             genes1.select must equal the number of genes specified in the 
-             genes.select vector.")
-      else{
-        genes1.select <- genes.select[genes1.select]
-      }
-    }
-    if (!is.null(n1.genes)){
-      if (length(genes1.select) != n1.genes) 
-        stop("Error: n1.genes must equal number of genes selected in 
-                 simulation through genes1.select vector.")
-    }
-    if (is.null(n1.genes)) n1.genes <- length(genes1.select)
-    
-    if (!is.null(n1.diff)){
-      if (sum(genes.diff %in% genes1.select) != n1.diff) 
-        stop("Error: n1.diff must equal number of genes selected in 
-                 simulation through genes1.select vector.")
-    }
-    if (is.null(n1.diff)) n1.diff <- sum(genes.diff %in% genes1.select)
-    genes1.diff <- genes.diff[genes.diff %in% genes1.select]
-  }
-  
-  if (is.null(n1.genes)) n1.genes <- n.genes
-  if (is.null(n1.diff)) n1.diff <- n.diff  
-  
-  if (!is.numeric(n1.genes)) 
-    stop("Error: n1.genes must be a positive integer less than n.genes.")
-  else if (round(n1.genes) != n1.genes || n1.genes > n.genes || n1.genes < 0) 
-    stop("Error: n1.genes must be a positive integer less than n.genes.")
-  
-  if (!is.numeric(n1.diff)) 
-    stop("Error: n1.diff must be a positive integer less than the 
-         minimum of n.diff and n1.genes.")
-  else if (round(n1.diff) != n1.diff || n1.diff > n.diff || 
-             n1.diff > n1.genes || n1.diff < 0) 
-    stop("Error: n1.diff must be a positive integer less than the 
-         minimum of n.diff and n1.genes.")
-
-  if (is.numeric(n1.diff)){
-    if (n.diff - n1.diff > n.genes - n1.genes) 
-      stop("Error:n.diff - n1.diff, must be a positive integer less than the total
-           number of genes available in the second group, n.genes - n1.genes.")
-  }
-  
-  
   #sort necessary inputs
   sort.list <- SortData(counts = counts, treatment = treatment,
-                        replic = replic, sort.method = sort.method, offset = offset)
+                        replic = replic, sort.method = sort.method, norm.factors = norm.factors)
   counts <- sort.list[[1]]
   treatment <- sort.list[[3]]
-  offset <- sort.list[[4]]
+  norm.factors <- sort.list[[4]]
   sorting <- sort.list[[5]]
   
   #reset n.row and n.col variables since SortData function may have trimmed
@@ -223,8 +162,9 @@ function(counts, treatment, replic = NULL, sort.method,
   
   #calculate p-value of differential depression for each gene
   if (is.null(probs) && is.null(weights) && is.null(genes.diff)){
+    require(fdrtool)
     probs <- CalcPvalWilcox(counts = counts, treatment = treatment,
-                            sort.method = sort.method, sorted = TRUE, offset = offset)
+                            sort.method = sort.method, sorted = TRUE, norm.factors = norm.factors)
   }  
   
   #calulate local fdr (empirical bayes probability of differential expression) for each gene
@@ -233,105 +173,69 @@ function(counts, treatment, replic = NULL, sort.method,
       1 - fdrtool(probs, statistic = "pvalue", plot = FALSE, verbose = FALSE)$lfdr
   } 
   
-  SampGenes <- function(genes.select, genes.diff, genes1.select, genes1.diff = NULL,
-                         n.genes, n.diff, n1.genes, n1.diff, 
+  SampGenes <- function(genes.select, genes.diff, n.genes, n.diff, 
                          weights, power, exact){
     #sample genes to be used in simulation and sample which genes are
     #to be differentially expressed
     
     genes <- 1:n.row
     if (is.null(genes.diff)){
-      if(is.null(genes.select)){
-        genes.diff <- 
-          sample(genes, n.diff, prob = (weights)^power, replace = FALSE)
-      } else {
-        genes.diff <- 
-          sample(genes.select, n.diff, prob = (weights[genes.select])^power, replace = FALSE)
-      }
-    } 
-    if (is.null(genes1.diff)){
-      if (n1.diff > 0){
-        genes.diff1 <- sample(genes.diff, n1.diff, replace = FALSE)
-        genes.diff2 <- genes.diff[!genes.diff %in% genes.diff1]
-      } else{
-        genes.diff1 <- NULL
-        genes.diff2 <- genes.diff
-      }
-    } else{
-      genes.diff1 <- genes1.diff
-      genes.diff2 <- genes.diff[!genes.diff %in% genes1.diff]
-    }
-    
-    if (is.null(genes.select)) genes.subset <- 
-      c(sample(genes[-genes.diff], n.genes - n.diff, replace = FALSE), genes.diff)
-    else genes.subset <- genes.select
-    if (is.null(genes1.select)){
-      if (n1.genes > 0){
-        if (n1.genes - n1.diff > 0){
-          genes.subset1 <- c(
-            sample(genes.subset[!genes.subset %in% genes.diff], n1.genes - n1.diff, replace = FALSE), genes.diff1)
-          genes.subset2 <- genes.subset[!genes.subset %in% genes.subset1]
-        } else{
-          genes.subset1 <- genes.diff1
-          genes.subset2 <- genes.subset[!genes.subset %in% genes.diff1]
+      if(n.diff > 0){
+        if(is.null(genes.select)){
+          genes.diff <- 
+            sample(genes, n.diff, prob = (weights)^power, replace = FALSE)
+        } else {
+          genes.diff <- 
+            sample(genes.select, n.diff, prob = (weights[genes.select])^power, replace = FALSE)
         }
-      } else{
-        genes.subset1 <- NULL
-        genes.subset2 <- genes.subset
       }
-    } else{
-      genes.subset1 <- genes1.select
-      genes.subset2 <- genes.select[!genes.select %in% genes1.select]
+      else genes.diff <- NULL
+    }     
+    if (is.null(genes.select)) {
+      if(is.null(genes.diff)) genes.subset <- sample(genes, n.genes, replace = FALSE)
+        else {
+          genes.subset <-
+        c(sample(genes[-genes.diff], n.genes - n.diff, replace = FALSE), genes.diff)
+      }
     }
-    genes.subset1 <- sort(genes.subset1)
-    genes.subset2 <- sort(genes.subset2)
-    genes.subset <- sort(c(genes.subset1,genes.subset2))
-    genes.diff1 <- sort(genes.diff1)
-    genes.diff2 <- sort(genes.diff2)
-    genes.diff <- sort(c(genes.diff1,genes.diff2))
-    DE.genes1 <- genes.subset1 %in% genes.diff1
-    DE.genes2 <- genes.subset2 %in% genes.diff2
+    else genes.subset <- genes.select
+
+    genes.subset <- sort(genes.subset)
+    if (!is.null(genes.diff)) genes.diff <- sort(genes.diff)
     DE.genes <- genes.subset %in% genes.diff
     
-    return(list(genes.subset = genes.subset, genes.subset1 = genes.subset1, 
-                genes.subset2 = genes.subset2, genes.diff = genes.diff, 
-                genes.diff1 = genes.diff1, genes.diff2 = genes.diff2, 
-                DE.genes = DE.genes, DE.genes1 = DE.genes1, DE.genes2 = DE.genes2))
+    return(list(genes.subset = genes.subset, genes.diff = genes.diff,  
+                DE.genes = DE.genes))
   }
   
   #sample EE and DE genes
-  samp.genes.list <- SampGenes(genes.select, genes.diff, genes1.select, genes1.diff, 
-                                n.genes, n.diff, n1.genes, n1.diff,
+  samp.genes.list <- SampGenes(genes.select, genes.diff, n.genes, n.diff,
                                 weights, power, exact)
-  genes.subset <- samp.genes.list[[1]]
-  genes.subset1 <- samp.genes.list[[2]]
-  genes.subset2 <- samp.genes.list[[3]]
-  genes.diff <- samp.genes.list[[4]]
-  genes.diff1 <- samp.genes.list[[5]]
-  genes.diff2 <- samp.genes.list[[6]]
-  DE.genes1 <- samp.genes.list[[8]]
-  DE.genes2 <- samp.genes.list[[9]]
+
+  genes.subset <- samp.genes.list$genes.subset
+  genes.diff <- samp.genes.list$genes.diff
+  DE.genes <- samp.genes.list$DE.genes
   
   
   SampCol <- function(n.col, k.ind, sort.method, treatment){
     #sample columns (replicates) to be used
     
     if (sort.method == "paired"){
-      evens <- seq(2, n.col, by = 2)
-      samp <- sample(evens, 2*k.ind, replace = F)
-      samp <- c(samp, samp - 1)
+      odds <- seq(1, n.col, by = 2)
+      samp <- sample(odds, 2*k.ind, replace = F)
+      samp <- c(samp[1:k.ind], samp + 1)
     }
     if (sort.method == "unpaired"){  
       trt1 <- 1:table(treatment)[1]
       trt2 <- (table(treatment)[1] + 1):length(treatment)
-      samp <- c(sample(trt1, 2*k.ind), sample(trt2, 2*k.ind))
+      samp <- c(sample(trt1, k.ind), sample(trt2, 2*k.ind))
     }
     samp <- as.numeric(samp)
     return(samp)
   }
   
   #swap in appropriate data to create matrix with known DE and EE genes
-  #multiply by appropriate offsets and round
+  #multiply by appropriate norm.factors and round
 
   
   samp.col <- NULL
@@ -339,84 +243,39 @@ function(counts, treatment, replic = NULL, sort.method,
   if (samp.independent == FALSE){
     samp <- SampCol(n.col, k.ind, sort.method, treatment)
     samp.col <- sorting[samp]
-    offset.col <- offset[samp]
+    norm.factors.col <- norm.factors[samp]
     
-    #perform swaps for group 1
-    data1 <- counts[genes.subset1, samp, drop = FALSE]
-    data.table1 <- data1[, (2*k.ind + 1):(4*k.ind), drop = FALSE]
-    data.table1[DE.genes1, 1:k.ind] <- 
-      round(t(t(data1[DE.genes1, 1:k.ind])/offset.col[1:k.ind]*offset.col[(2*k.ind + 1):(3*k.ind)]))
-    
-    #perform swaps for group 2
-    data2 <- counts[genes.subset2, samp, drop = FALSE]
-    data.table2 <- data2[, 1:(2*k.ind), drop = FALSE]
-    data.table2[DE.genes2, 1:k.ind] <- 
-      round(t(t(data2[DE.genes2, (2*k.ind + 1):(3*k.ind)])/offset.col[(2*k.ind + 1):(3*k.ind)]*
-                offset.col[1:k.ind]))
-    
-    #combine matrices from both groups
-    data.table <- rbind(data.table1, data.table2)
-    
-    #order by genes.subset
-    data.table <- data.table[order(c(genes.subset1, genes.subset2)), ]
+    #perform swaps
+    data <- counts[genes.subset, samp, drop = FALSE]
+    data.table <- data[, (k.ind + 1):(3*k.ind), drop = FALSE]
+    data.table[DE.genes, 1:k.ind] <- 
+      round(t(t(data[DE.genes, 1:k.ind])/norm.factors.col[1:k.ind]*norm.factors.col[(k.ind + 1):(2*k.ind)]))
   }
   
   #swap in appropriate data to create matrix with known DE and EE genes
-  #multiply by appropriate offsets and round
+  #multiply by appropriate norm.factors and round
   #under independent method, sample columns separately and independently
   #for each gene
 
   if (samp.independent == TRUE){
     samp <- t(replicate(n.genes, SampCol(n.col, k.ind, sort.method, treatment)))
-    offset.col <- apply(samp, 2, function(x) offset[x])
+    norm.factors.col <- apply(samp, 2, function(x) norm.factors[x])
     
-    #perform swaps for group 1
-    if (n1.genes > 0){
-      samp1 <- samp[1:n1.genes, , drop = FALSE]
-      offset.col1 <- offset.col[1:n1.genes, , drop = FALSE]
-      data.temp1 <- counts[genes.subset1, , drop = FALSE]
-      data1 <- matrix(mapply(function(x, y) data.temp1[x, y], x = 1:n1.genes, 
-                             y = samp1, SIMPLIFY = TRUE), ncol = 4*k.ind)
-      normalized1 <- data1/offset.col1
-      data.table1 <- normalized1[, (2*k.ind + 1):(4*k.ind), drop = FALSE]
-      if (n1.diff > 0){
-        data.table1[DE.genes1, 1:k.ind] <- normalized1[DE.genes1, 1:k.ind, drop = FALSE]
+    #perform swaps
+      data.temp <- counts[genes.subset, , drop = FALSE]
+      data <- matrix(mapply(function(x, y) data.temp[x, y], x = 1:n.genes, 
+                             y = samp, SIMPLIFY = TRUE), ncol = 4*k.ind)
+      normalized <- data/norm.factors.col
+      data.table <- normalized[, (k.ind + 1):(3*k.ind), drop = FALSE]
+      if (n.diff > 0){
+        data.table[DE.genes, 1:k.ind] <- normalized[DE.genes, 1:k.ind, drop = FALSE]
       }
-    }
-    if (n1.genes == 0) data.table1 <- NULL
     
-    #perform swaps for group 2
-    if (n1.genes < n.genes){
-      if (n1.genes > 0) {
-        samp2 <- samp[-(1:n1.genes), , drop = FALSE]
-        offset.col2 <- offset.col[-(1:n1.genes), , drop = FALSE]
-      }
-      if (n1.genes == 0) {
-        samp2 <- samp
-        offset.col2 <- offset.col
-      }
-      data.temp2 <- counts[genes.subset2, , drop = FALSE]
-      data2 <- 
-        matrix(mapply(function(x, y) data.temp2[x, y], x = 1:(n.genes - n1.genes), 
-                      y = samp2, SIMPLIFY = TRUE), ncol = 4*k.ind)
-      normalized2 <- data2/offset.col2
-      data.table2 <- normalized2[, 1:(2*k.ind), drop = FALSE]
-      if (n.diff - n1.diff > 0){
-        data.table2[DE.genes2,1:k.ind] <- normalized2[DE.genes2, (2*k.ind+1):(3*k.ind), drop = FALSE]
-      }
-    }
-    if (n1.genes == n.genes) data.table2 <- NULL
-    
-    #combine matrices from both groups
-    data.table <- rbind(data.table1, data.table2)
     #unnormalize dataset
-    data.table = round(t(t(data.table)*offset[sample(1:n.col, 2*k.ind, replace = FALSE)]))
-    #order by genes.subset
-    data.table <- data.table[order(c(genes.subset1, genes.subset2)), ]
+    data.table = round(t(t(data.table)*norm.factors[sample(1:n.col, 2*k.ind, replace = FALSE)]))
   }
+  trt <- c(rep(1, k.ind), rep(2, k.ind))
   
-  return(list(counts = data.table, genes.subset = genes.subset, 
-              genes.subset1 = genes.subset1, genes.subset2 = genes.subset2, 
-              DE.genes = genes.diff, DE.genes1 = genes.diff1, 
-              DE.genes2 = genes.diff2, samp.col = samp.col))
+  return(list(counts = data.table, treatment = rep("N", k.ind), rep("T"), genes.subset = genes.subset, 
+              DE.genes = genes.diff, samp.col = samp.col))
 }

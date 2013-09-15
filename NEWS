@@ -1,4 +1,11 @@
-2013-09-07: SimSeq Version 0.4.0
+0.5.0: 2013-09-14: SimSeq version 0.5.0
+	- changed name of "offset" input to "norm.factors" in all functions
+	- removed symmetric swapping functionally. As such n1.diff, n1.genes, and genes1.select are removed from all functions
+	- Updated Documentation
+	- Moved packages 'edgeR' and 'fdrtool's back to Depends field
+	- updated demo file
+
+0.4.0: 2013-09-07: SimSeq Version 0.4.0
 	- Changed version names of all files from 1.x.y to 0.x.y 
 	- removed pval.hist function
 	- now calculates weights for sampling genes by local fdr through fdrtool function from CRAN package 'fdrtool'
@@ -7,39 +14,36 @@
 	- updated documentation of functions
 	- removed package 'edgeR' from Depends field in description file
 	- added package 'edgeR' and 'fdrtool' to Suggests field in description file 
-SB
 
-2013-08-29: SimSeq Version 1.3.0
-	-Moved wilcox signed rank and rank sum test out of SimData function to its own function, CalcPvalWilcox
-	-Changed default for offsets to calcNormFactors from package 'edgeR' using method "TMM"
-	-created dependency on package 'edgeR'
-	-Changed independence swapping code (changed method for adjusting data by offsets, eliminated for-loops)
-	-set samp.independent default to FALSE
-	-minimal cleaning up of help/documentation files (still needs a bit of work)
-	-created CalcPvalWilcox .Rd file
-SB
+0.3.0: 2013-08-29: SimSeq Version 0.3.0
+	- Moved wilcox signed rank and rank sum test out of SimData function to its own function, CalcPvalWilcox
+	- Changed default for offsets to calcNormFactors from package 'edgeR' using method "TMM"
+	- Created dependency on package 'edgeR'
+	- Changed independence swapping code (changed method for adjusting data by offsets, eliminated for-loops)
+	- Set samp.independent default to FALSE
+	- Minimal cleaning up of help/documentation files (still needs a bit of work)
+	- Created CalcPvalWilcox .Rd file
 
-2013-08-24: SimSeq Version 1.2
-	-substantially cleaned up code for readability and maintainability
-	-added more detailed comments to code
-	-Renamed data.sim and sortdata functions to SimData and SortData respectively
-	-Added samp.genes functions
-	-fixed errors in offset under the independent method section
-SB
+0.2.0: 2013-08-24: SimSeq Version 0.2.0
+	- Substantially cleaned up code for readability and maintainability
+	- Added more detailed comments to code
+	- Renamed data.sim and sortdata functions to SimData and SortData respectively
+	- Added samp.genes functions
+	- Fixed errors in offset under the independent method section
 
 
-2013-08-19: SimSeq Version 1.1
-	-Added symmetric swap functionality to data.sim function
-	-Added checks on initial parameters submitted to data.sim function
-	-help files are no longer working
-SB
+0.1.0: 2013-08-19: SimSeq Version 0.1.0
+	- Added symmetric swap functionality to data.sim function
+	- Added checks on initial parameters submitted to data.sim function
+	- help files are no longer working
 
-2013-08-17: SimSeq Version 1.0
+
+0.0.0: 2013-08-17: SimSeq Version 0.0.0
 	- Created sortdata, samp.col, and data.sim functions
 	- sortdata: sorts matrix of gene express. data given vector of replicates and treatment
 	- samp.col: samples replicates by columns separately and independently
 	- data.sim: Now has functionality to simulate under both standard and independent method for both paired and unpaired data			
-SB  
+  
 
 
 

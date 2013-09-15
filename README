@@ -8,7 +8,7 @@ install.packages("devtools")
 library(devtools)
 install_github("SimSeq","sbenidt")
 
-### Or you can download the latest tar.gz file from the bin folder and submit the 
+### Or you can download the latest tarball (tar.gz file) from the bin folder and submit the 
 ### following commands to the R console, changing the path variable as appropriate 
 ### for where it is stored on your local PC. You may need to specify or change the
 ### "lib" path in the install.packages function  

@@ -7,14 +7,14 @@ Calculate P-values of Differential Expression
 A function called within SimData. Calculates the P-value of differential expression for each gene under either Wilcoxin signed rank test (paired data) or rank sum test (unpaired data). Will base test of the log of the counts for each gene plus 1 divided by their respective column offsets.
 }
 \usage{
-CalcPvalWilcox(counts, treatment, replic = NULL, sort.method, sorted = FALSE, offset, exact = FALSE)
+CalcPvalWilcox(counts, treatment, replic = NULL, sort.method, sorted = FALSE, norm.factors, exact = FALSE)
 }
 \arguments{
   \item{counts}{
-A matrix of counts where each row specifies a gene and each column specifies a replicate; counts matrix must contain data from an experiment with two treatment groups of either paired or unpaired data.
+A matrix of counts where each row specifies a gene and each column specifies a replicate.
 }
   \item{treatment}{
-A vector specifying the treatment group for each column of the counts matrix; should match number of columns of counts matrix.
+A vector specifying the treatment group for each column of the counts matrix. Only two treatment groups of either paired or unpaired data are allowed.
 }
   \item{replic}{
 A vector specifying the replicate for each column of the counts matrix when there is paired data; optional if data is unpaired.
@@ -25,15 +25,15 @@ Character vector specifying one of "unpaired" or "paired", depending on the stru
   \item{sorted}{
 logical vector specifying whether data has already gone through SortData function. Defaults to FALSE.
 }
-  \item{offset}{
-A positive numeric vector with length equal to the number of columns of counts matrix.
+  \item{norm.factors}{
+A positive numeric vector of multiplicative normalization factors for each column of the counts matrix.
 }
   \item{exact}{
 Specifies whether an exact signed rank test (paired) or exact ranksum test (unpaired) should be used.
 }
 }
 \value{
-probs: A vector of p-values of differential expression for each gene.
+probs: a vector of p-values of differential expression for each gene
 }
 \author{
 Samuel Benidt <sbenidt@iastate.edu>

@@ -1,5 +1,5 @@
 SortData <-
-function(counts, treatment, replic = NULL, sort.method, offset = NULL){
+function(counts, treatment, replic = NULL, sort.method, norm.factors = NULL){
   #Trims and sorts matrix of counts into appropriate format to be used
   #in data.sim
   
@@ -27,28 +27,29 @@ function(counts, treatment, replic = NULL, sort.method, offset = NULL){
   if (sort.method == "paired" && is.null(replic)) 
     stop("Error: Must specify replic vector when sort.method equals 'paired'.")
   
-  if(!is.null(offset)){
-    if (!is.numeric(offset)) 
-      stop("Error: offset must be a positive numeric vector with 
+  if(!is.null(norm.factors)){
+    if (!is.numeric(norm.factors)) 
+      stop("Error: norm.factors must be a positive numeric vector with 
            length equal to the number of columns in the counts matrix.")
-    if (is.numeric(offset)){
-      if (any(offset <= 0) || length(offset) != n.col) 
-        stop("Error: offset must be a positive numeric vector with 
+    if (is.numeric(norm.factors)){
+      if (any(norm.factors <= 0) || length(norm.factors) != n.col) 
+        stop("Error: norm.factors must be a positive numeric vector with 
              length equal to the number of columns in the counts matrix.")
     }
   }
+
   
-  if (sort.method == "paired"){ 
+  if(sort.method == "paired"){ 
     #sort inputs by replic then treatment
     sorting <- order(replic, treatment, decreasing = FALSE)
     replic <- replic[sorting]
     treatment <- treatment[sorting]
     counts <- counts[, sorting, drop = FALSE]
-    offset <- offset[sorting]
+    norm.factors <- norm.factors[sorting]
     
     #remove replicates in inputs that are non-paired
     counts <- counts[, replic %in% unique(replic)[tabulate(replic) == 2], drop = FALSE]
-    offset <- offset[replic %in% unique(replic)[tabulate(replic) == 2]]
+    norm.factors <- norm.factors[replic %in% unique(replic)[tabulate(replic) == 2]]
     treatment <- factor(treatment[replic %in% unique(replic)[tabulate(replic) == 2]])
     sorting <- sorting[replic %in% unique(replic)[tabulate(replic) == 2]]
     replic <- factor(replic[replic %in% unique(replic)[tabulate(replic) == 2]])
@@ -60,11 +61,11 @@ function(counts, treatment, replic = NULL, sort.method, offset = NULL){
     replic <- replic[sorting]
     treatment <- treatment[sorting]
     counts <- counts[, sorting, drop = FALSE]
-    offset <- offset[sorting]
+    norm.factors <- norm.factors[sorting]
     
     #no need to remove any columns (replicates)
   }
   
   return(list(counts = counts, replic = replic, treatment = treatment, 
-              offset = offset, sorting = sorting))
+              norm.factors = norm.factors, sorting = sorting))
   }
