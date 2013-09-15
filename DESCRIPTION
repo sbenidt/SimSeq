@@ -1,12 +1,11 @@
 Package: SimSeq
 Type: Package
 Title: Data Based Simulation of RNA-Seq Data
-Version: 0.4.0
-Date: 2013-09-07
+Version: 0.5.0
+Date: 2013-09-14
 Author: Samuel Benidt
 Maintainer: Samuel Benidt <sbenidt@iastate.edu>
-Depends: R (>= 2.10.0)
-Suggests: edgeR, fdrtool
+Depends: R (>= 2.10.0), edgeR, fdrtool
 Description: SimSeq is a package that creates a simulated RNA-Seq dataset with a known set of differentially expressed (DE) genes and equivalently expressed (EE) genes. This simulation assumes no underlying statistical model, but rather is based on a provided matrix of real gene expression data with large sample sizes in each treatment group. Such a simulation is useful to evaluate statistical methodology for RNA-Seq in that false discovery proportions (FDP's) are known exactly due to knowledge of which genes are simulated to be DE and which are simulated to be EE.
 License: GPL-2
 
