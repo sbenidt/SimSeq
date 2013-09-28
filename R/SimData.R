@@ -264,7 +264,7 @@ function(counts, treatment, replic = NULL, sort.method,
     #perform swaps
       data.temp <- counts[genes.subset, , drop = FALSE]
       data <- matrix(mapply(function(x, y) data.temp[x, y], x = 1:n.genes, 
-                             y = samp, SIMPLIFY = TRUE), ncol = 4*k.ind)
+                             y = samp, SIMPLIFY = TRUE), ncol = 3*k.ind)
       normalized <- data/norm.factors.col
       data.table <- normalized[, (k.ind + 1):(3*k.ind), drop = FALSE]
       if (n.diff > 0){
