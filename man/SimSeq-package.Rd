@@ -8,8 +8,8 @@
 \tabular{ll}{
 Package: \tab SimSeq\cr
 Type: \tab Package\cr
-Version: \tab 0.5.0\cr
-Date: \tab 2013-09-14\cr
+Version: \tab 0.5.1\cr
+Date: \tab 2013-09-28\cr
 License: \tab GPL-2\cr
 }
 SimSeq performs data based simulation of RNA-Seq data creating a dataset with a known list of DE and EE genes. The core function that implements of the methodology of SimSeq is the SimData function.
