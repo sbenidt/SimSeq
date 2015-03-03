@@ -2,7 +2,7 @@ SimData <-
 function(counts, treatment, replic = NULL, sort.method, 
                      k.ind, n.genes = NULL, n.diff = NULL, 
                      norm.factors = NULL, samp.independent = FALSE,
-                     genes.select = NULL, genes.diff = NULL,
+                     genes.select = NULL, genes.diff = NULL, switch.trt = FALSE, 
                      probs = NULL, weights = NULL, exact = FALSE, power = 1){
   #given matrix of gene expression counts with two treatment groups, 
   #simulates matrix of gene expression data with known list of DE
@@ -144,8 +144,8 @@ function(counts, treatment, replic = NULL, sort.method,
     }
   
   if (is.null(norm.factors)) {
-    require(edgeR)
-    norm.factors <- calcNormFactors(counts, method = "TMM") 
+    norm.factors <- apply(counts, 2, quantile, 0.75)
+    norm.factors <- norm.factors/exp(mean(log(norm.factors))) #normalize so that geometric mean is 1
   }
   #sort necessary inputs
   sort.list <- SortData(counts = counts, treatment = treatment,
@@ -162,7 +162,6 @@ function(counts, treatment, replic = NULL, sort.method,
   
   #calculate p-value of differential depression for each gene
   if (is.null(probs) && is.null(weights) && is.null(genes.diff)){
-    require(fdrtool)
     probs <- CalcPvalWilcox(counts = counts, treatment = treatment,
                             sort.method = sort.method, sorted = TRUE, norm.factors = norm.factors)
   }  
@@ -219,13 +218,22 @@ function(counts, treatment, replic = NULL, sort.method,
   
   SampCol <- function(n.col, k.ind, sort.method, treatment){
     #sample columns (replicates) to be used
-    
-    if (sort.method == "paired"){
+    if (sort.method == "paired" && switch.trt == FALSE){
       odds <- seq(1, n.col, by = 2)
-      samp <- sample(odds, 2*k.ind, replace = F)
+      samp <- sample(odds, 2*k.ind, replace = FALSE)
+      samp <- c(samp, samp[-(1:k.ind)] + 1)
+    }
+    else if (sort.method == "paired" && switch.trt == TRUE){
+      odds <- seq(1, n.col, by = 2)
+      samp <- sample(odds, 2*k.ind, replace = FALSE)
       samp <- c(samp[1:k.ind], samp + 1)
     }
-    if (sort.method == "unpaired"){  
+    else if (sort.method == "unpaired" && switch.trt == FALSE){  
+      trt1 <- 1:table(treatment)[1]
+      trt2 <- (table(treatment)[1] + 1):length(treatment)
+      samp <- c(sample(trt1, 2*k.ind), sample(trt2, k.ind))
+    }
+    else if (sort.method == "unpaired" && switch.trt == TRUE){  
       trt1 <- 1:table(treatment)[1]
       trt2 <- (table(treatment)[1] + 1):length(treatment)
       samp <- c(sample(trt1, k.ind), sample(trt2, 2*k.ind))
@@ -247,9 +255,17 @@ function(counts, treatment, replic = NULL, sort.method,
     
     #perform swaps
     data <- counts[genes.subset, samp, drop = FALSE]
+    
+    if(switch.trt == FALSE){
+      data.table <- data[, 1:(2*k.ind), drop = FALSE]
+      data.table[DE.genes, (k.ind+1):(2*k.ind)] <- 
+        round(t(t(data[DE.genes, (2*k.ind + 1):(3*k.ind)])/norm.factors.col[(2*k.ind + 1):(3*k.ind)]*norm.factors.col[(k.ind+1):(2*k.ind)]))
+    } 
+    else if (switch.trt == TRUE){
     data.table <- data[, (k.ind + 1):(3*k.ind), drop = FALSE]
     data.table[DE.genes, 1:k.ind] <- 
       round(t(t(data[DE.genes, 1:k.ind])/norm.factors.col[1:k.ind]*norm.factors.col[(k.ind + 1):(2*k.ind)]))
+    }
   }
   
   #swap in appropriate data to create matrix with known DE and EE genes
@@ -266,9 +282,17 @@ function(counts, treatment, replic = NULL, sort.method,
       data <- matrix(mapply(function(x, y) data.temp[x, y], x = 1:n.genes, 
                              y = samp, SIMPLIFY = TRUE), ncol = 3*k.ind)
       normalized <- data/norm.factors.col
-      data.table <- normalized[, (k.ind + 1):(3*k.ind), drop = FALSE]
-      if (n.diff > 0){
-        data.table[DE.genes, 1:k.ind] <- normalized[DE.genes, 1:k.ind, drop = FALSE]
+      if(switch.trt == FALSE){
+        data.table <- normalized[, 1:(2*k.ind), drop = FALSE]
+        if (n.diff > 0){
+          data.table[DE.genes, (k.ind + 1):(2*k.ind)] <- normalized[DE.genes, (2*k.ind + 1):(3*k.ind), drop = FALSE]
+        }
+      }
+      if(switch.trt == TRUE){
+        data.table <- normalized[, (k.ind + 1):(3*k.ind), drop = FALSE]
+        if (n.diff > 0){
+          data.table[DE.genes, 1:k.ind] <- normalized[DE.genes, 1:k.ind, drop = FALSE]
+        }
       }
     
     #unnormalize dataset
@@ -276,6 +300,6 @@ function(counts, treatment, replic = NULL, sort.method,
   }
   trt <- c(rep(1, k.ind), rep(2, k.ind))
   
-  return(list(counts = data.table, treatment = rep("N", k.ind), rep("T"), genes.subset = genes.subset, 
-              DE.genes = genes.diff, samp.col = samp.col))
+  return(list(counts = data.table, treatment = c(rep(0, k.ind), rep(1, k.ind)), genes.subset = genes.subset, 
+              DE.genes = genes.diff, col = samp.col))
 }
