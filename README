@@ -1,7 +1,7 @@
 ### The package SimSeq is currently hosted on CRAN with any development versions continuing to be hosted here.
 
 ### Release numbering system:
-### x.y.0 are CRAN releases while x.y.z where z \neq 0 are development versions
+### x.y.0 are CRAN releases for x >= 1, while x.y.z where z \neq 0 are development versions
 
 ### To install the CRAN release of SimSeq simply type:
 install.packages("SimSeq")
