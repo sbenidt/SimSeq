@@ -1,11 +1,11 @@
 Package: SimSeq
 Type: Package
-Title: Data Based Simulation of RNA-Seq Data
-Version: 0.5.1
-Date: 2013-09-28
+Title: Nonparametric Simulation of RNA-Seq Data
+Version: 1.2.0
+Date: 2014-12-09
 Author: Samuel Benidt
 Maintainer: Samuel Benidt <sbenidt@iastate.edu>
-Depends: R (>= 2.10.0), edgeR, fdrtool
-Description: RNA-Seq analysis methods are often derived by relying on hypothetical parametric models for read counts that are not likely to be precisely satisfied in practice.  Methods are often tested by analyzing data that have been simulated according to the assumed model.  This testing strategy can result in an overly optimistic view of the performance of an RNA-Seq analysis method.  Rather than generating data from a questionable parametric model, the SimSeq package provides tools for simulating RNA-Seq data by subsampling from existing datasets.  The vector of read counts simulated for a given experimental unit has a joint distribution that closely matches the distribution of actual RNA-Seq data.  Users can control the proportion of genes simulated to be differentially expressed (DE) and can adjust the magnitude of differences for DE genes. SimSeq requires a matrix of RNA-Seq read counts with large sample sizes in at least two treatment groups. Although a full version of such a dataset is not distributed with the package, numerous candidate datasets are publicly available.
-License: GPL-2
-
+Depends: R (>= 2.10.0)
+Imports: fdrtool
+Description: RNA sequencing analysis methods are often derived by relying on hypothetical parametric models for read counts that are not likely to be precisely satisfied in practice. Methods are often tested by analyzing data that have been simulated according to the assumed model. This testing strategy can result in an overly optimistic view of the performance of an RNA-seq analysis method. We develop a data-based simulation algorithm for RNA-seq data. The vector of read counts simulated for a given experimental unit has a joint distribution that closely matches the distribution of a source RNA-seq dataset provided by the user. Users control the proportion of genes simulated to be differentially expressed (DE) and can provide a vector of weights to control the distribution of effect sizes. The algorithm requires a matrix of RNA-seq read counts with large sample sizes in at least two treatment groups. Many datasets are available that fit this standard.
+License: GPL (>= 2)

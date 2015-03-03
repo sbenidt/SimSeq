@@ -1,1 +1,2 @@
-exportPattern("^[[:alpha:]]+")
+export(CalcPvalWilcox, SimData, SortData)
+importFrom(fdrtool, fdrtool)

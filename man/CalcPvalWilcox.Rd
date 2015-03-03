@@ -4,10 +4,11 @@
 Calculate P-values of Differential Expression
 }
 \description{
-A function called within SimData. Calculates the P-value of differential expression for each gene under either Wilcoxin signed rank test (paired data) or rank sum test (unpaired data). Will base test of the log of the counts for each gene plus 1 divided by their respective column offsets.
+A function called within SimData. Calculates the P-value of differential expression for each gene under either Wilcoxin signed rank test (paired data) or rank sum test (unpaired data). The vector of differences used in the test is based off of the log of the counts for each gene plus 1 divided by their respective multiplicative normalization factors provided by the user.
 }
 \usage{
-CalcPvalWilcox(counts, treatment, replic = NULL, sort.method, sorted = FALSE, norm.factors, exact = FALSE)
+CalcPvalWilcox(counts, treatment, replic = NULL, sort.method, 
+               sorted = FALSE, norm.factors, exact = FALSE)
 }
 \arguments{
   \item{counts}{
@@ -33,7 +34,7 @@ Specifies whether an exact signed rank test (paired) or exact ranksum test (unpa
 }
 }
 \value{
-probs: a vector of p-values of differential expression for each gene
+probs: a vector of p-values of differential expression for each gene.
 }
 \author{
 Samuel Benidt <sbenidt@iastate.edu>

@@ -4,7 +4,7 @@
 SortData
 }
 \description{
-A function called in SimData used to trim and sort the matrix of counts provided
+A function called in SimData used to trim and sort the matrix of counts provided.
 }
 \usage{
 SortData(counts, treatment, replic = NULL, sort.method, norm.factors = NULL)
@@ -30,11 +30,11 @@ An optional positive numeric vector of multiplicative normalization factors for 
 }
 \value{
 List containing:
-\item{counts}{sorted and trimmed matrix of counts}
-\item{replic}{sorted and trimmed replic vector}
-\item{treatment}{sorted and trimmed treatment vector}
-\item{offset}{sorted and trimmed offset vector}
-\item{sorting}{sorting vector used to sort and trim}
+\item{counts}{sorted and trimmed matrix of counts.}
+\item{replic}{sorted and trimmed replic vector.}
+\item{treatment}{sorted and trimmed treatment vector.}
+\item{norm.factors}{sorted and trimmed offset vector.}
+\item{sorting}{sorting vector used to sort and trim.}
 }
 \author{
 Samuel Benidt <sbenidt@iastate.edu>

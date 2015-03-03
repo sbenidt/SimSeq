@@ -1,8 +1,12 @@
-### The package SimSeq is currently hosted here but will eventually
-### be submitted to CRAN with any development versions continuing to be hosted here
+### The package SimSeq is currently hosted on CRAN with any development versions continuing to be hosted here.
 
-### To install SimSeq it is highly recommended to install and use the 
-### devtools package
+### Release numbering system:
+### x.y.0 are CRAN releases while x.y.z where z \neq 0 are development versions
+
+### To install the CRAN release of SimSeq simply type:
+install.packages("SimSeq")
+
+### To install a development version of SimSeq use the devtools package
 
 install.packages("devtools")
 library(devtools)

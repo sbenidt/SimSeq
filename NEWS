@@ -1,3 +1,24 @@
+1.2.0: 2014-12-09
+	- Set default norm factors estimation to 0.75 quantile of all counts
+	- Removed edgeR dependency
+	- Added in full TCGA KIRC dataset version 1.5.0
+	- Added in switch to change factor levels (treatment groups) around in SimData function
+	- Updated documentations files
+
+1.1.0: 2014-05-25: SimSeq version 1.1.0
+	- Updated SimData function to return columns used in sampling algorithm
+
+1.0.0: 2014-02-17: SimSeq version 1.0.0
+	- Initial CRAN release
+
+0.5.2: 2014-02-17: SimSeq version 0.5.2
+	- Updated package namespace to export and import variables
+	- Changed depends to imports for edgeR and fdrtool
+	- Fixed treatment output in function SimData
+	- Removed algorithm from documentation for function SimData
+	- Removed samp.col from output for function SimData
+	- Changed treatment from 0 and 1 to non-tumor and tumor in kidney dataset
+
 0.5.1: 2013-09-28: SimSeq version 0.5.1
 	- fixed bug in samp.independent method in SimData function when samp.independent equal TRUE
 	- updated documentation
