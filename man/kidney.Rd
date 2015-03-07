@@ -38,6 +38,9 @@ data(kidney)
 \dontrun{
 ### Source code used to assemble KIRC dataset
 
+### load in SimSeq package for sorting counts matrix
+require(SimSeq)
+
 ### htmlToText function used to scrape barcode data from uuid
 htmlToText <- function(input, ...) {
   ###---PACKAGES ---###
@@ -115,6 +118,9 @@ n.col <- length(file.list)
 ### initialize counts matrix
 counts <- matrix(NA, nrow = n.row, ncol = n.col)
 
+### get gene id's
+gene.id <- read.table(file.temp, header = TRUE, stringsAsFactors = FALSE)$gene_id
+
 ### read in raw read counts from file.list
 for(i in 1:n.col){
   file.temp <- file.path(mainDir, folder.path, file.list[i])
@@ -125,6 +131,9 @@ for(i in 1:n.col){
 ### counts for ambiguous reads. Counts are rounded as a preprocessing
 ### step.
 counts <- round(counts)
+
+### Cast counts matrix as integer type
+counts <- matrix(as.integer(counts), nrow = nrow(counts), ncol = ncol(counts))
 
 ### Get uuid's for each sample
 uuid <- substr(file.list, start = 9, stop = 44)
@@ -145,7 +154,7 @@ barcodes <- substr(barcodes, start = 1, stop = 28)
 
 ### Get metadata on which samples were taken from each individual, 
 ### tumor type of sample, etc. from barcodes for each sample
-metadata <- data.frame(barcodes)
+metadata <- data.frame(barcodes, stringsAsFactors = FALSE)
 
 ### Study Participant
 metadata$participant <- substr(barcodes, start = 9, stop = 12)
@@ -182,7 +191,10 @@ sorting <-
 counts <- counts[, sorting]
 metadata <- metadata[sorting, ]
 metadata$participant <- factor(metadata$participant)
-metadata$barcodes <- factor(metadata$barcodes)
+
+### Add in attributes of counts matrix
+dimnames(counts) <- list(gene.id, metadata$barcodes)
+attr(counts, "uuid") <- uuid
 
 kidney <- vector("list", 3)
 kidney[[1]] <- counts
@@ -191,7 +203,7 @@ kidney[[3]] <- metadata$tumor
 names(kidney) <- c("counts", "replic", "treatment")
 
 ###Save file
-save(kidney, "kidney.rda")
+save(kidney, file = "kidney.rda")
 }
 }
 \keyword{datasets}

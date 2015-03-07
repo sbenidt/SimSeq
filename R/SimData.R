@@ -296,10 +296,13 @@ function(counts, treatment, replic = NULL, sort.method,
       }
     
     #unnormalize dataset
-    data.table = round(t(t(data.table)*norm.factors[sample(1:n.col, 2*k.ind, replace = FALSE)]))
+    data.table <- round(t(t(data.table)*norm.factors[sample(1:n.col, 2*k.ind, replace = FALSE)]))
   }
   trt <- c(rep(1, k.ind), rep(2, k.ind))
   
+  ### remove column attributes
+  colnames(data.table) <- NULL
+  
   return(list(counts = data.table, treatment = c(rep(0, k.ind), rep(1, k.ind)), genes.subset = genes.subset, 
-              DE.genes = genes.diff, col = samp.col))
+              DE.genes = genes.diff, DE.ind = genes.subset %in% genes.diff, col = samp.col))
 }

@@ -1,0 +1,21 @@
+citHeader("Please cite Benidt and Nettleton (2015) for use of the SimData function. In addition, please cite The Cancer Genome Atlas Research Network (2013) when using the kidney cancer dataset as a source RNA-seq dataset in the SimData function.")
+
+citEntry(
+   entry="article",
+   title = "SimSeq: A Nonparametric Approach to Simulation of RNA-Sequence Datasets",
+   author = "Benidt, Sam and Nettleton, Dan",
+   journal = "Bioinformatics",
+   year = 2015,
+   textVersion = "Benidt, S., and Nettleton, D. (2015). SimSeq: a nonparametric approach to simulation of RNA-sequence datasets. Bioinformatics. doi: 10.1093/bioinformatics/btv124."
+)
+
+citEntry(
+   entry="article",
+   title = "Comprehensive molecular characterization of clear cell renal cell carcinoma",
+   author = "The Cancer Genome Atlas Research Network",
+   journal = "Nature",
+   volume = 499,
+   pages = 43-29,
+   year = 2015,
+   textVersion = "The Cancer Genome Atlas Research Network (2013). Comprehensive molecular characterization of clear cell renal cell carcinoma. Nature, 499, 43-49."
+)

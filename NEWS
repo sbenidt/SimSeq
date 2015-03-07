@@ -1,3 +1,9 @@
+1.3.0: 2015-03-06
+	- Added citation file
+	- Added SimSeq paper to sources of SimData function
+	- Added gene annotations to KIRC dataset
+	- Add in vector of DE genes to output of SimData function
+
 1.2.0: 2014-12-09
 	- Set default norm factors estimation to 0.75 quantile of all counts
 	- Removed edgeR dependency

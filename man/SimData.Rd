@@ -66,12 +66,13 @@ List containing:
 \item{counts}{matrix of simulated RNA-seq data with known list of DE and EE genes.}
 \item{treament}{a numeric vector specifying the treatment group structure in the new simulated counts matrix.}
 \item{genes.subset}{all genes included in the simulated matrix. The i-th entry corresponds to the i-th row of the simulated counts matrix.}
-\item{DE.genes}{vector of differentially expressed genes.}
+\item{DE.genes}{vector of genes used for differential expression in the simulated counts matrix.}
+\item{DE.ind}{logical vector indicating which genes are differentially expressed in the simulated counts matrix.}
 \item{col}{vector of lenght 3*k.ind specifying which columns were used in the simulation. The first k.ind columns were used to simulate the first treatment group. The last 2*k.ind columns were used to simulate the second treatment group. If switch.trt equals TRUE, then the first 2*k.ind columns were used to simulate the first treatment group and the last k.ind columns were used to simulate the second treatment group.}
 }
 
 \details{
-SimData simulates an RNA-seq matrix from a given RNA-sequence dataset. If you use the Kidney Cancer (KIRC) dataset from the The Cancer Genome Atlas as a source dataset for use in this function, please cite the appropriate reference below in any publications.
+SimData simulates an RNA-seq matrix of counts from a large source RNA-sequence dataset using a resampling based approach. If you use the Kidney Cancer (KIRC) dataset from the The Cancer Genome Atlas as the source RNA-seq counts matrix in the SimData function, please cite The Cancer Genome Atlas Research Network (2013) in any publications.
 }
 
 \author{
@@ -79,9 +80,11 @@ Samuel Benidt <sbenidt@iastate.edu>
 }
 
 \source{
-https://tcga-data.nci.nih.gov/tcga/
+Benidt, S., and Nettleton, D. (2015). SimSeq: a nonparametric approach to simulation of RNA-sequence datasets. Bioinformatics. doi: 10.1093/bioinformatics/btv124. 
 
 The Cancer Genome Atlas Research Network (2013). Comprehensive molecular characterization of clear cell renal cell carcinoma. Nature, 499(7456), 43-49.
+
+https://tcga-data.nci.nih.gov/tcga/
 }
 
 \examples{
